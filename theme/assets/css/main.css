@@ -1,0 +1,197 @@
+/* ==========================
+   UTIL: Visually hidden (accesibilidad)
+   ========================== */
+.visually-hidden {
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap; /* evitar wrap */
+}
+
+/* ==========================
+   Estilos principales del tasador (mantener IDs actuales)
+   - Estos estilos son específicos del componente y se pueden mover a CSS global si se desea
+   ========================== */
+#tasador-debug.d-none {
+  display: none !important;
+}
+
+.form-tasacion-container select {
+  width: 300px;
+  margin: 0 auto;
+}
+.form-tasacion-container select#version-select {
+  width: 400px;
+}
+
+.form-select.is-listbox[size] {
+  margin: 0 auto;
+  line-height: 1.25;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  background-color: #fff;
+  color: #212529;
+  height: auto;
+  max-height: 240px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.form-select option,
+.form-select[size="1"] {
+  padding: 0.25rem;
+  font-size: 0.85rem;
+}
+.form-select option:hover {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+.form-select option:checked,
+.form-select:focus option:checked {
+  background-color: #f8f9fa !important;
+}
+.form-select:focus {
+  outline: 0;
+  border-color: #aaa;
+  box-shadow: 0 0 0 0.15rem rgba(144, 146, 149, 0.15);
+}
+.form-select option[disabled] {
+  color: #9aa0a6;
+}
+
+.form-tasacion-container input[name="mileage"],
+.form-tasacion-container input[name="licensePlate"] {
+  width: 150px;
+  margin: 0 auto;
+}
+
+@media (max-width: 576px) {
+  .form-tasacion-container select,
+  .form-tasacion-container input[type="number"] {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Scrollbar visual (WebKit/Blink y Firefox) */
+.form-select[size]::-webkit-scrollbar {
+  width: 8px;
+}
+.form-select[size]::-webkit-scrollbar-track {
+  background: #eee;
+  border-radius: 8px;
+}
+.form-select[size]::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 8px;
+}
+.form-select[size]::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+.form-select[size] {
+  scrollbar-width: thin;
+  scrollbar-color: #bbb #eee;
+}
+
+.step-index {
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 0.5em;
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+.step-label {
+  display: block;
+  margin-top: 0.5em;
+  font-size: 0.875em;
+  color: var(--black);
+  font-weight: 600;
+  font-family: var(--title-font);
+}
+.step-item {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  text-align: center;
+  margin-bottom: 0 !important;
+}
+.step-item.active .step-index,
+.step-item.complete .step-index {
+  background-color: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* Gravity Forms tweaks */
+.tasaciones__form {
+  background: #fff;
+}
+.gform_tasacion .gf_progressbar_wrapper {
+  display: none;
+}
+.gform_tasacion .gform-page-footer {
+  justify-content: end;
+}
+.gform_tasacion .gform-page-footer .gform_next_button {
+  background-color: var(--black) !important;
+  border-color: var(--black);
+  color: #fff !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 1.5rem;
+  border-radius: 24px !important;
+}
+
+/* Inputs GF */
+.ginput_container input[type="text"],
+.ginput_container input[type="email"],
+.ginput_container input[type="tel"],
+.ginput_container textarea,
+.gform_drop_area,
+.gform_page_fields select {
+  border: 1px solid #ced4da !important;
+  border-radius: 8px !important;
+  background-color: #fff;
+  color: #212529 !important;
+}
+.ginput_container input[type="text"]:focus,
+.ginput_container input[type="email"]:focus,
+.ginput_container input[type="tel"]:focus,
+.ginput_container textarea:focus,
+.gform_drop_area:focus {
+  outline: 0;
+  border-color: #aaa !important;
+  box-shadow: 0 0 0 0.15rem rgba(144, 146, 149, 0.15);
+}
+.ginput_container input[type="text"]::placeholder,
+.ginput_container input[type="email"]::placeholder,
+.ginput_container input[type="tel"]::placeholder,
+.ginput_container textarea::placeholder {
+  color: #6c757d !important;
+  opacity: 1;
+}
+.ginput_container input[type="text"]:disabled,
+.ginput_container input[type="email"]:disabled,
+.ginput_container input[type="tel"]:disabled,
+.ginput_container textarea:disabled {
+  background-color: #e9ecef !important;
+  opacity: 1;
+}
+
+/* Botones generales */
+.btn:disabled {
+  background-color: var(--black);
+  border-color: var(--black);
+  color: #fff;
+  opacity: 0.25;
+}
