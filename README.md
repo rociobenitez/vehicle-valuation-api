@@ -2,8 +2,7 @@
 
 ## Resumen técnico
 
-Componente independiente que implementa la interfaz y la lógica cliente/servidor para un **tasador online de vehículos**.  
-El repositorio contiene únicamente la parte del _theme_ implicada en el flujo de tasación (selección marca → modelo → versión → año → puertas → km → cálculo y envío) para poder demostrar la funcionalidad de forma aislada dentro de un entorno WordPress.
+Componente independiente que implementa la interfaz y la lógica cliente/servidor para un **tasador online de vehículos**. El repositorio contiene únicamente la parte del _theme_ implicada en el flujo de tasación (selección marca → modelo → versión → año → puertas → km → cálculo y envío) para poder demostrar la funcionalidad de forma aislada dentro de un entorno WordPress.
 
 ![Formulario de tasación - Paso 1](img/valuation-form-step-brands.png)
 
@@ -31,25 +30,23 @@ El repositorio contiene únicamente la parte del _theme_ implicada en el flujo d
 ├─ README.md
 ├─ LICENSE
 ├─ .gitignore
-├─ img/                # Screenshots y recursos gráficos
-├─ docs/               # Documentación detallada (qué hace cada archivo)
+├─ img/                      # Screenshots y recursos gráficos
+├─ docs/                     # Documentación detallada
 └─ theme/
-    ├─ functions.php   # Integración mínima (enqueue scripts, wp_localize_script, etc.)
     ├─ assets/
     │ ├─ js/
-    │ │ └─ main.js     # Lógica principal del tasador
+    │ │ └─ main.js           # Lógica principal del tasador
     │ └─ css/
     │   └─ main.css
-    ├─ templates/
-    │   └─ page-valuation.php
-    └─ readme-theme.md
+    ├─ functions.php         # Integración mínima
+    └─ page-valuation.php
 ```
 
 ## Requisitos / Stack
 
 - WordPress (mínimo 5.x para compatibilidad con GF/ACF modernas)
 - PHP 7.4+ (recomendado 8.0+)
-- Gravity Forms (para demo del flujo propietario)
+- Gravity Forms
 - ACF Pro (opcional: si quieres cargar campos desde ACF)
 - Bootstrap (estilos usados; se pueden sustituir)
 - Navegadores modernos (IntersectionObserver, Fetch API — Polyfill si es necesario)
@@ -59,14 +56,13 @@ El repositorio contiene únicamente la parte del _theme_ implicada en el flujo d
 1. Clona el repo en tu entorno local:
 
    ```bash
-   git clone <URL-privada-o-temporal> vehicle-valuation-component
+   git clone git@github.com:rociobenitez/vehicle-valuation-api.git
    ```
 
-2. Copia la carpeta `theme/` a tu instalación WordPress local (por ejemplo en `wp-content/themes/vehicle-valuation-component/`).
+2. Copia el código de los archivos de la carpeta `theme/` en tu theme de WordPress (en `wp-content/themes/tu-theme/`).
 3. Habilita el theme en WordPress (apariencia → temas).
-4. Importa el formulario de Gravity Forms de ejemplo (si se proporciona en `docs/`).
+4. Importa el formulario de Gravity Forms de ejemplo.
 5. Asegúrate de no dejar claves en `functions.php`. Si el script requiere `ajax_object` o `nonce`, configúralos mediante `wp_localize_script` desde `functions.php`.
-6. Opcional: activa ACF local JSON o importa los grupos desde `docs/`.
 
 ## Variables sensibles y buenas prácticas
 
@@ -86,12 +82,12 @@ El repositorio contiene únicamente la parte del _theme_ implicada en el flujo d
 
 ## Contribuciones y documentación
 
-- La carpeta `docs/` contiene documentación por archivo: responsabilidades, entradas/salidas y notas importantes para cada fichero.
-- Si añades cambios, actualiza `docs/` y el `CHANGELOG.md` (opcional).
+- La carpeta `docs/` contiene documentación por archivo.
+- Si añades cambios, actualiza `docs/` o crea un `CHANGELOG.md` (opcional).
 
 ## Licencia
 
-Este proyecto está publicado bajo la **MIT License** (archivo `LICENSE` en el repo). Ver sección LICENCE abajo.
+Este proyecto está publicado bajo la **MIT License**.
 
 ## Agradecimientos
 
