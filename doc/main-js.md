@@ -34,15 +34,36 @@
 ### Reglas de negocio y validaciones
 
 - `blockedBrands` — **marcas no tasables** (ej.: Tesla, Jaguar, Land Rover)
-- `YEAR_MAX_AGE` — **antigüedad máxima** para ser elegible (`9` años)
+- Si la marca es Volvo, aplica una **penalización fija** de `-500€`
+- `YEAR_MAX_AGE` — **antigüedad máxima** para dar valoración (`9` años)
+  - Si se supera, muestra el mensaje _"Contacta con nosotros"_
 - `VALUATION_MAX_KM` — **kilómetros máximos** (`140000`)
-- Validación de año y mensaje si no es elegible (**oculta botón siguiente**)
+  - Si se supera, muestra el mensaje _"Contacta con nosotros"_
+- Validación de año y kilómetros si no es elegible (**oculta botón siguiente**)
+- **Preguntas adicionales** que afectan al precio:
+  - ¿Era nuevo cuando lo compraste?
+    - Si (No varía precio)
+    - No ( -300€=)
+  - ¿Tienes libro de mantenimiento?
+    - Si (No varía precio)
+    - No (-300€)
+  - ¿Nº de llaves?
+    - 2 ( 0€)
+    - 1 (-300€)
+  - Estado exterior
+    - Perfectas condiciones (No varía tasación)
+    - Ligeramente desgastado (-300€)
+    - Desgastado (-600€)
+  - Estado interior
+    - Perfectas condiciones (No varía tasación)
+    - Ligeramente desgastado (-300€)
+    - Desgastado (-600€)
 
 ### Integración con Gravity Forms
 
-- Recoge datos seleccionados y los formatea (`formatFormData`) para rellenar un campo oculto en GF (`input_5_13`)
+- Recoge datos seleccionados y los formatea (`formatFormData`) para rellenar un campo oculto en GF (`input_[ID-FORM]_13`)
 - Llama a la API `calcular_tasacion` con `make`, `model`, `version`, `doors`, `year`, `mileage`
-- Inserta el **importe base** en `input_5_14` y el **importe final** en `input_5_29`
+- Inserta el **importe base** en `input_[ID-FORM]_14` y el **importe final** en `input_[ID-FORM]_29`
 - Si la API no devuelve cotización, escribe un **mensaje descriptivo** en los campos GF en vez de `0`. `computeFinalValuation` detecta esto y lo preserva
 
 ### Cálculo final (lado cliente)

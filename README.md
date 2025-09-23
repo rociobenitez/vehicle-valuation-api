@@ -5,6 +5,8 @@
 Componente independiente que implementa la interfaz y la lógica cliente/servidor para un **tasador online de vehículos**.  
 El repositorio contiene únicamente la parte del _theme_ implicada en el flujo de tasación (selección marca → modelo → versión → año → puertas → km → cálculo y envío) para poder demostrar la funcionalidad de forma aislada dentro de un entorno WordPress.
 
+![Formulario de tasación - Paso 1](img/valuation-form-step-brands.png)
+
 > Nota: el proyecto puede integrar (opcionalmente) una API externa de valoración de vehículos (p. ej. Autobiz) para obtener la cotización base. No se incluyen claves ni credenciales en el repositorio.
 
 ## Estado
@@ -29,6 +31,7 @@ El repositorio contiene únicamente la parte del _theme_ implicada en el flujo d
 ├─ README.md
 ├─ LICENSE
 ├─ .gitignore
+├─ img/                # Screenshots y recursos gráficos
 ├─ docs/               # Documentación detallada (qué hace cada archivo)
 └─ theme/
     ├─ functions.php   # Integración mínima (enqueue scripts, wp_localize_script, etc.)

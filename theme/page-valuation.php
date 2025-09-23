@@ -69,7 +69,7 @@ set_query_var('fields', $fields);
         </div>
 
         <?php // Se recomienda mantener el form con method POST. Gravity Forms se encarga del submit final. ?>
-        <form id="form-tasacion" method="post" class="position-relative my-3" novalidate>
+        <form id="form-tasacion" method="post" class="form-tasacion position-relative my-3" novalidate>
 
             <!-- Mensaje para usuarios sin JS -->
             <noscript>
@@ -85,7 +85,7 @@ set_query_var('fields', $fields);
 
             <!-- PASO 1: VEHÍCULO -->
             <div class="form-step d-grid justify-content-center" id="step-1" aria-labelledby="label-brand-select">
-                <p class="heading-6 mb-3 text-center"><?php _e('Selecciona la Marca', 'text-domain-theme'); ?></p>
+                <p class="form-title mb-2 text-center"><?php _e('Selecciona la Marca', 'text-domain-theme'); ?></p>
 
                 <?php // Select de marcas: mantenemos los IDs originales para compatibilidad con JS ?>
                 <div class="col-12 text-center">
@@ -108,7 +108,7 @@ set_query_var('fields', $fields);
             <!-- PASO 2: MODELO -->
             <div class="form-step d-none" id="step-2" aria-labelledby="label-model-select">
                 <button type="button" class="<?php echo esc_attr($class_btn_prev); ?>" id="prev-step-2" aria-controls="step-1"><?php echo esc_html($text_btn_prev); ?></button>
-                <p class="heading-6 mb-3 text-center"><?php _e('Selecciona el Modelo', 'text-domain-theme'); ?></p>
+                <p class="form-title mb-2 text-center"><?php _e('Selecciona el Modelo', 'text-domain-theme'); ?></p>
 
                 <div class="text-center mb-3">
                     <span class="fs14">
@@ -135,7 +135,7 @@ set_query_var('fields', $fields);
             <!-- PASO 3: VERSIÓN -->
             <div class="form-step d-none" id="step-3" aria-labelledby="label-version-select">
                 <button type="button" class="<?php echo esc_attr($class_btn_prev); ?>" id="prev-step-3" aria-controls="step-2"><?php echo esc_html($text_btn_prev); ?></button>
-                <p class="heading-6 mb-3 text-center"><?php _e('Selecciona la Versión', 'text-domain-theme'); ?></p>
+                <p class="form-title mb-2 text-center"><?php _e('Selecciona la Versión', 'text-domain-theme'); ?></p>
 
                 <div class="text-center mb-3">
                     <span class="fs14">
@@ -164,7 +164,7 @@ set_query_var('fields', $fields);
             <!-- PASO 4: AÑO -->
             <div class="form-step d-none" id="step-4" aria-labelledby="label-year-select">
                 <button type="button" class="<?php echo esc_attr($class_btn_prev); ?>" id="prev-step-4" aria-controls="step-3"><?php echo esc_html($text_btn_prev); ?></button>
-                <p class="heading-6 mb-3 text-center"><?php _e('Año', 'text-domain-theme'); ?></p>
+                <p class="form-title mb-2 text-center"><?php _e('Año', 'text-domain-theme'); ?></p>
 
                 <div class="col-12 text-center">
                     <label id="label-year-select" for="year-select" class="visually-hidden"><?php esc_html_e('Selecciona el año del vehículo', 'text-domain-theme'); ?></label>
@@ -189,7 +189,7 @@ set_query_var('fields', $fields);
             <!-- PASO 5: PUERTAS -->
             <div class="form-step d-none" id="step-5" aria-labelledby="label-doors-select">
                 <button type="button" class="<?php echo esc_attr($class_btn_prev); ?>" id="prev-step-5" aria-controls="step-4"><?php echo esc_html($text_btn_prev); ?></button>
-                <p class="heading-6 mb-3 text-center"><?php _e('Número de Puertas', 'text-domain-theme'); ?></p>
+                <p class="form-title mb-2 text-center"><?php _e('Número de Puertas', 'text-domain-theme'); ?></p>
 
                 <div class="col-12 text-center">
                     <label id="label-doors-select" for="doors-select" class="visually-hidden"><?php esc_html_e('Selecciona número de puertas', 'text-domain-theme'); ?></label>
@@ -209,27 +209,28 @@ set_query_var('fields', $fields);
             <!-- PASO 6: KILOMETRAJE y MATRÍCULA -->
             <div class="form-step d-none" id="step-6" aria-labelledby="label-mileage">
                 <button type="button" class="<?php echo esc_attr($class_btn_prev); ?>" id="prev-step-6" aria-controls="step-5"><?php echo esc_html($text_btn_prev); ?></button>
+                <div class="d-flex justify-content-center gap-4 flex-column flex-md-row align-items-stretch align-items-md-center" aria-labelledby="label-mileage label-license-plate">
+                    <div class="mb-3">
+                        <label id="label-mileage" for="mileage" class="form-label form-title mb-2"><?php _e('Kilometraje', 'text-domain-theme'); ?></label>
+                        <input type="number" name="mileage" id="mileage" class="form-control" placeholder="Ej: 50000" inputmode="numeric" min="0" step="1" required aria-describedby="km-message" />
 
-                <div class="mb-3 col-10 col-md-6 mx-auto text-center">
-                    <label id="label-mileage" for="mileage" class="form-label heading-6 mb-3"><?php _e('Kilometraje', 'text-domain-theme'); ?></label>
-                    <input type="number" name="mileage" id="mileage" class="form-control" placeholder="Ej: 50000" inputmode="numeric" min="0" step="1" required aria-describedby="km-message" />
+                        <div class="text-center fs14 mx-auto mt-3" id="message-too-many-km" style="display:none;" role="alert" aria-live="polite">
+                            <p class="mb-2">
+                                <?php _e('Solo podemos tasar de forma online vehículos con un ', 'text-domain-theme'); ?>
+                                <strong><?php _e('máximo de 140.000 km.', 'text-domain-theme'); ?></strong>
+                                <?php _e('Contacta con nosotros para más información.', 'text-domain-theme'); ?>
+                            </p>
+                            <a href="/contacto/" class="btn btn-sm py-2 btn-primary mt-2"><?php _e('Contactar', 'text-domain-theme'); ?></a>
+                        </div>
+                    </div>
 
-                    <div class="text-center fs14 mx-auto mt-3" id="message-too-many-km" style="display:none;" role="alert" aria-live="polite">
-                        <p class="mb-2">
-                            <?php _e('Solo podemos tasar de forma online vehículos con un ', 'text-domain-theme'); ?>
-                            <strong><?php _e('máximo de 140.000 km.', 'text-domain-theme'); ?></strong>
-                            <?php _e('Contacta con nosotros para más información.', 'text-domain-theme'); ?>
-                        </p>
-                        <a href="/contacto/" class="btn btn-sm py-2 btn-primary mt-2"><?php _e('Contactar', 'text-domain-theme'); ?></a>
+                    <div class="pt-4">
+                        <label for="licensePlate" class="form-label form-title mb-2"><?php _e('Matrícula', 'text-domain-theme'); ?></label>
+                        <input type="text" name="licensePlate" id="licensePlate" class="form-control" placeholder="Ej: 1234 ABC" maxlength="12" />
                     </div>
                 </div>
 
-                <div class="pt-4 mt-4 mb-3 col-10 col-md-6 mx-auto text-center border-top">
-                    <label for="licensePlate" class="form-label heading-6 mb-3"><?php _e('Matrícula', 'text-domain-theme'); ?></label>
-                    <input type="text" name="licensePlate" id="licensePlate" class="form-control" placeholder="Ej: 1234 ABC" maxlength="12" />
-                </div>
-
-                <!-- Resultado de tasación (zona visible, manejada por JS). role=status para anunciar cambios -->
+                <?php // Resultado de tasación (zona visible, manejada por JS). role=status para anunciar cambios ?>
                 <div id="tasacion-result" class="d-none mx-auto" role="status" aria-live="polite"></div>
 
                 <div class="mt-4 d-flex justify-content-center">
@@ -247,9 +248,9 @@ set_query_var('fields', $fields);
             <?php
             // Gravity Forms: campos ocultos esperados para integration frontend:
             // (comprobar que los IDs coinciden con los del formulario en GF)
-            // - input_9_13 -> resumen de datos
-            // - input_9_14 -> importe base (autobiz) o mensaje descriptivo
-            // - input_9_29 -> importe final (calculado en cliente) o mensaje descriptivo
+            // - input_[ID]_13 -> resumen de datos
+            // - input_[ID]_14 -> importe base (autobiz) o mensaje descriptivo
+            // - input_[ID]_29 -> importe final (calculado en cliente) o mensaje descriptivo
             ?>
         </div>
 

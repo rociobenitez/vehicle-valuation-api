@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // IDs de Gravity Forms
   const GF_IDS = {
-    form: "form-tasacion",
+    formTasacion: "form-tasacion",
     inputData: "input_9_13",
     inputBase: "input_9_14",
     inputFinal: "input_9_29",
@@ -31,6 +31,17 @@ document.addEventListener("DOMContentLoaded", () => {
     inputLlaves: "input_9_24",
     inputInt: "input_9_25",
     gformNextBtn: "gform_next_button_9_28",
+    gformPrevBtn: "gform_previous_button_9_28",
+    gformSubmitBtn: "gform_submit_button_9",
+  };
+
+  // Mapeo de selects a botones "Siguiente"
+  const NEXT_BY_SELECT = {
+    "brand-select": "next-1",
+    "model-select": "next-2",
+    "version-select": "next-3",
+    "year-select": "next-4",
+    "doors-select": "next-5",
   };
 
   // Mensajes
@@ -96,6 +107,44 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ======================= 
      Helpers para <select>
      ======================= */
+
+  /**
+   * Muestra un loader en un <select>
+   * @param {string} selectId
+   * @param {string} msg
+   * @returns {function} función de cleanup
+   */
+  const showLoader = (selectId, msg = "Cargando opciones…") => {
+    const select = getElement(selectId);
+    if (!select) return () => {};
+    select.setAttribute("aria-busy", "true");
+    select.disabled = true;
+
+    // deshabilita botón "Siguiente" si lo hay
+    const nextId = NEXT_BY_SELECT[selectId];
+    const nextBtn = nextId ? getElement(nextId) : null;
+    if (nextBtn) nextBtn.disabled = true; // solo mientras carga
+
+    // inserta loader (una sola instancia por select)
+    let holder = select.parentElement || select;
+    let loader = holder.querySelector(".select-loader");
+    if (!loader) {
+      loader = document.createElement("div");
+      loader.className = "select-loader";
+      loader.innerHTML = `<span class="spinner" aria-hidden="true"></span><span role="status">${msg}</span>`;
+      holder.appendChild(loader);
+    } else {
+      loader.style.display = "flex";
+    }
+
+    // función de cleanup
+    return () => {
+      select.removeAttribute("aria-busy");
+      select.disabled = false;
+      if (loader) loader.style.display = "none";
+      if (nextBtn) nextBtn.disabled = false;
+    };
+  };
 
   /**
    * Cuenta el número de opciones "reales" (sin placeholder) en un <select>
@@ -369,6 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const select = getElement(selectId);
     if (!select) return;
     renderSelectOptions(selectId, [], { placeholder: "Cargando..." });
+    const cleanupLoader = showLoader(selectId, "Cargando opciones…");
 
     try {
       const data = await fetchData(action, payload);
@@ -390,6 +440,8 @@ document.addEventListener("DOMContentLoaded", () => {
       renderSelectOptions(selectId, [], { placeholder: "—" });
       alert("Error al obtener los datos. Inténtalo de nuevo.");
       console.error("[loadToSelect] Error:", err);
+    } finally {
+      cleanupLoader(); // quita spinner y restaura estados
     }
   };
 
@@ -493,6 +545,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!nextBtn) return;
 
     nextBtn.addEventListener("click", async () => {
+      showStep(7); // Mostrar GF
+      const cleanupLoader = showLoader("step-6", "Cargando…");
+      setStepperActive(2); // Marcar stepper en paso 2 (Propietario)
+
+      // No mostrar el botón de "Atrás"
+      const btnPrev = getElement("prev-step-7");
+      if (btnPrev) btnPrev.style.display = "none";
+
       // Normaliza km
       const mileageInput = getElement("mileage");
       const mileage = mileageInput
@@ -537,12 +597,9 @@ document.addEventListener("DOMContentLoaded", () => {
         year: year,
         mileage: mileage,
       };
-      console.log("[Tasación] Payload para tasación:", payload);
 
       try {
         const result = await fetchData("calcular_tasacion", payload);
-        console.log("[Tasación] Resultado de la tasación:", result);
-
         // let base = 0;
         let base = null;
         if (result?.success === true && result?.data?.quotation != null) {
@@ -561,16 +618,14 @@ document.addEventListener("DOMContentLoaded", () => {
           );
         }
 
-        console.log("[Tasación] Tasación base:", base);
         computeFinalValuation();
       } catch (err) {
         console.error("[Tasación] Error al calcular la tasación:", err);
         if (gfImporteBase) gfImporteBase.value = QUOTE_FAIL_MSG;
         if (gfImporteFinal) gfImporteFinal.value = QUOTE_FAIL_MSG;
+      } finally {
+        cleanupLoader(); // quita spinner
       }
-
-      showStep(7); // Mostrar GF
-      setStepperActive(2); // Marcar stepper en paso 2 (Propietario)
 
       // Foco al primer campo visible de GF y hooks de recaptcha/gform
       setTimeout(() => {
@@ -598,6 +653,11 @@ document.addEventListener("DOMContentLoaded", () => {
         // Al hacer click en "Siguiente" de GF ir a 'Preguntas' (step 3)
         getElement(GF_IDS.gformNextButton)?.addEventListener("click", () => {
           setStepperActive(3);
+        });
+
+        // Al hacer click en "Enviar" de GF ir a 'Confirmación' (step 4)
+        getElement(GF_IDS.gformSubmitBtn)?.addEventListener("click", () => {
+          setStepperActive(4);
         });
       }, 0);
     });
@@ -652,23 +712,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // setea el oculto "importe final"
     if (out) out.value = String(finalAmount);
-
-    console.log(
-      "[Tasación] calc -> base:",
-      base,
-      "| eraNuevo:",
-      eraNuevo,
-      "libro:",
-      libro,
-      "llaves:",
-      llaves,
-      "ext:",
-      ext,
-      "int:",
-      int,
-      "| final:",
-      finalAmount
-    );
     return finalAmount;
   };
 
@@ -731,8 +774,8 @@ document.addEventListener("DOMContentLoaded", () => {
     resetSelect("year-select", "Selecciona el año");
     resetSelect("doors-select", "Selecciona nº de puertas");
 
-    await loadModelos(makeId);
     showStep(2);
+    await loadModelos(makeId);
   });
 
   getElement("next-2")?.addEventListener("click", async () => {
@@ -749,8 +792,8 @@ document.addEventListener("DOMContentLoaded", () => {
     resetSelect("year-select", "Selecciona el año");
     resetSelect("doors-select", "Selecciona nº de puertas");
 
-    await loadVersiones(makeId, modelId);
     showStep(3);
+    await loadVersiones(makeId, modelId);
   });
 
   getElement("next-3")?.addEventListener("click", async () => {
@@ -762,8 +805,8 @@ document.addEventListener("DOMContentLoaded", () => {
     resetSelect("year-select", "Selecciona el año");
     resetSelect("doors-select", "Selecciona nº de puertas");
 
-    await loadYears(makeId, modelId);
     showStep(4);
+    await loadYears(makeId, modelId);
   });
 
   getElement("next-4")?.addEventListener("click", async () => {
@@ -780,14 +823,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     resetSelect("doors-select", "Selecciona nº de puertas");
-    await loadDoors(makeId, modelId);
     showStep(5);
+    await loadDoors(makeId, modelId);
   });
 
   getElement("next-5")?.addEventListener("click", () => {
     const doors = getElement("selectedDoors").value;
     if (!doors) return;
     showStep(6);
+  });
+
+  getElement(GF_IDS.gformNextBtn)?.addEventListener("click", () => {
+    setStepperActive(3);
+  });
+
+  getElement(GF_IDS.gformSubmitBtn)?.addEventListener("click", () => {
+    setStepperActive(4);
   });
 
   /* =================
@@ -844,15 +895,46 @@ Matrícula: ${data.licensePlate || "N/A"}`;
   /* ========================================
      Envío final del formulario de Tasación
      ======================================== */
-  document.getElementById(GF_IDS.formTasacion).addEventListener(
-    "submit",
-    (e) => {
-      e.preventDefault();
-      const prevStepBtn = getElement("prev-step-7");
-      if (prevStepBtn) prevStepBtn.disabled = true; // evitar volver atrás
-      computeFinalValuation();
-      // No hacer nada más, Gravity Forms gestiona el envío
-    },
-    true
-  );
+
+  // Handlers para sincronizar GF con el stepper
+  (function hookGFStepperSync() {
+    if (window.__hooked_gf_stepper_sync__) return;
+    window.__hooked_gf_stepper_sync__ = true;
+
+    const activateStep4 = () => {
+      setStepperActive(4);
+      // opcional: oculta botón atrás y evita volver
+      const prev = getElement("prev-step-7");
+      if (prev) prev.style.display = "none";
+    };
+
+    // MutationObserver detecta el wrapper de confirmación
+    const step7 = document.getElementById("step-7");
+    if (step7) {
+      const mo = new MutationObserver((muts) => {
+        for (const m of muts) {
+          for (const n of m.addedNodes) {
+            if (
+              n.nodeType === 1 &&
+              n.id &&
+              n.id.startsWith("gform_confirmation_wrapper_")
+            ) {
+              activateStep4();
+              return;
+            }
+            if (n.querySelector) {
+              const conf = n.querySelector(
+                '[id^="gform_confirmation_wrapper_"]'
+              );
+              if (conf) {
+                activateStep4();
+                return;
+              }
+            }
+          }
+        }
+      });
+      mo.observe(step7, { childList: true, subtree: true });
+    }
+  })();
 });

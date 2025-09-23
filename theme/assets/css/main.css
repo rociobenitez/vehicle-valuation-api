@@ -1,29 +1,29 @@
-/* ==========================
-   UTIL: Visually hidden (accesibilidad)
-   ========================== */
-.visually-hidden {
-  position: absolute !important;
-  height: 1px;
-  width: 1px;
-  overflow: hidden;
-  clip: rect(1px, 1px, 1px, 1px);
-  white-space: nowrap; /* evitar wrap */
-}
+:root {
+  --black: #1a2233;
+  --white: #f9fbfd;
+  --grey: #4a5a6a;
+  --light-grey: #eaf1fb;
+  --primary: #2563eb;
+  --primary-hover: #3b82f6;
+  --body: #22304a;
+  --heading: #16213e;
+  --bg-scrollbar: #e3eaf6;
+  --color-scrollbar: #90a4c2;
 
-/* ==========================
-   Estilos principales del tasador (mantener IDs actuales)
-   - Estos estilos son específicos del componente y se pueden mover a CSS global si se desea
-   ========================== */
-#tasador-debug.d-none {
-  display: none !important;
+  --title-font: "Manrope", sans-serif;
+  --body-font: "Roboto", sans-serif;
 }
-
-.form-tasacion-container select {
-  width: 300px;
-  margin: 0 auto;
-}
-.form-tasacion-container select#version-select {
-  width: 400px;
+.form-tasacion-container {
+  select {
+    width: 380px;
+    margin: 0 auto;
+  }
+  .form-tasacion .form-title {
+    font-family: var(--title-font);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
 }
 
 .form-select.is-listbox[size] {
@@ -32,7 +32,7 @@
   padding: 0.5rem;
   border: 1px solid #ced4da;
   border-radius: 0.25rem;
-  background-color: #fff;
+  background-color: var(--white) !important;
   color: #212529;
   height: auto;
   max-height: 240px;
@@ -96,8 +96,20 @@
   scrollbar-color: #bbb #eee;
 }
 
+/* Stepper */
+section ol#tasacion-stepper li:before {
+  display: none;
+}
+
+.form-tasacion-container .line {
+  width: 100%;
+  max-width: 75%;
+  z-index: -1;
+  margin-top: 16px;
+}
+
 .step-index {
-  background-color: #fff;
+  background-color: var(--white);
   color: #333;
   border: 1px solid #ccc;
   padding: 0.5em;
@@ -128,28 +140,80 @@
 .step-item.active .step-index,
 .step-item.complete .step-index {
   background-color: var(--primary);
-  color: #fff;
+  color: var(--white);
   border-color: var(--primary);
+}
+
+/* Spinner */
+.select-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+  color: #686e77;
+  font-size: 0.9rem;
+  & .spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #cfd3d7;
+    border-top-color: var(--primary);
+    margin: 0;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.form-select[aria-busy="true"] {
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 /* Gravity Forms tweaks */
 .tasaciones__form {
-  background: #fff;
+  background: var(--white);
 }
-.gform_tasacion .gf_progressbar_wrapper {
-  display: none;
-}
-.gform_tasacion .gform-page-footer {
-  justify-content: end;
-}
-.gform_tasacion .gform-page-footer .gform_next_button {
-  background-color: var(--black) !important;
-  border-color: var(--black);
-  color: #fff !important;
-  font-size: 0.875rem !important;
-  font-weight: 600 !important;
-  padding: 0.75rem 1.5rem;
-  border-radius: 24px !important;
+.gform_tasacion {
+  & .gf_progressbar_wrapper {
+    display: none;
+  }
+  & .gform-page-footer {
+    justify-content: end;
+
+    & .gform_next_button {
+      background-color: var(--black) !important;
+      border-color: var(--black);
+      color: var(--white) !important;
+      font-size: 0.875rem !important;
+      font-weight: 600 !important;
+      padding: 0.75rem 1.5rem;
+      border-radius: 24px !important;
+    }
+  }
+  & .gform_confirmation_wrapper {
+    padding-top: 3rem;
+
+    & .gform_confirmation_message {
+      padding: 1.5rem 1rem !important;
+      text-align: center;
+      font-family: var(--title-font);
+      color: var(--black);
+      background-color: var(--light-grey);
+      font-weight: 500;
+      font-size: 15px;
+      border: 1px solid var(--bs-border-color);
+      border-radius: var(--bs-border-radius-sm);
+    }
+  }
+  & .gfield_consent_description {
+    font-size: 11px !important;
+    background: var(--bs-light);
+    border: 0 !important;
+  }
 }
 
 /* Inputs GF */
@@ -161,7 +225,7 @@
 .gform_page_fields select {
   border: 1px solid #ced4da !important;
   border-radius: 8px !important;
-  background-color: #fff;
+  background-color: var(--white) !important;
   color: #212529 !important;
 }
 .ginput_container input[type="text"]:focus,
@@ -192,6 +256,6 @@
 .btn:disabled {
   background-color: var(--black);
   border-color: var(--black);
-  color: #fff;
+  color: var(--white);
   opacity: 0.25;
 }
