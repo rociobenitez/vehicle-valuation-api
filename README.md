@@ -6,12 +6,29 @@ Componente independiente que implementa la interfaz y la lógica cliente/servido
 
 ![Formulario de tasación - Paso 1](img/valuation-form-step-brands.png)
 
-> Nota: el proyecto puede integrar (opcionalmente) una API externa de valoración de vehículos (p. ej. Autobiz) para obtener la cotización base. No se incluyen claves ni credenciales en el repositorio.
+> Nota: el proyecto incluye dos implementaciones alternativas de integración con APIs externas de valoración (Autobiz y Motorflash).  
+> Cada una se encuentra aislada en su propia carpeta para mostrar enfoques distintos sobre un mismo flujo funcional.  
+> No se incluyen claves ni credenciales en el repositorio.
 
 ## Estado
 
 - Código probado en entorno de desarrollo.
 - Objetivo: demostración funcional y referencia técnica, no despliegue directo como producto final.
+
+## Arquitectura de integración
+
+El componente mantiene una misma interfaz funcional (multi-step + AJAX + Gravity Forms) y desacopla la capa de valoración mediante dos implementaciones independientes:
+
+- `api-autobiz/`
+- `api-motorflash/`
+
+Ambas carpetas contienen su propia versión de:
+
+- `functions.php` (backend / endpoints AJAX)
+- `page-valuation.php` (plantilla)
+- `assets/js/main.js` (lógica cliente)
+
+El objetivo es demostrar cómo se adapta el mismo flujo de negocio a diferentes contratos de API sin mezclar código ni dependencias.
 
 ## Características principales
 
@@ -19,7 +36,7 @@ Componente independiente que implementa la interfaz y la lógica cliente/servido
 - Carga dinámica de selects mediante llamadas AJAX (Fetch API).
 - Integración con Gravity Forms para la captura de datos del propietario y envío final.
 - Reglas de negocio implementadas en cliente (filtros por marca, validación edad/km, penalizaciones).
-- Manejo de casos sin cotización: mensajes descriptivos y trazabilidad en campos ocultos de GF.
+- Manejo de errores funcionales y técnicos en API externa (ej. falta de comparables, token inválido, upstream errors).
 - Accesibilidad básica: labels accesibles, `aria-live` para mensajes dinámicos.
 - Código modular, con constantes para IDs de campos de GF y utilidades reutilizables.
 
@@ -33,13 +50,22 @@ Componente independiente que implementa la interfaz y la lógica cliente/servido
 ├─ img/                      # Screenshots y recursos gráficos
 ├─ docs/                     # Documentación detallada
 └─ theme/
-    ├─ assets/
-    │ ├─ js/
-    │ │ └─ main.js           # Lógica principal del tasador
-    │ └─ css/
-    │   └─ main.css
-    ├─ functions.php         # Integración mínima
-    └─ page-valuation.php
+    ├─ api-autobiz/
+    │   ├─ assets/
+    │   │ ├─ js/
+    │   │ │ └─ main.js           # Lógica principal del tasador
+    │   │ └─ css/
+    │   │   └─ main.css
+    │   ├─ functions.php         # Integración mínima
+    │   └─ page-valuation.php
+    └─ api-motorflash/
+        ├─ assets/
+        │ ├─ js/
+        │ │ └─ main.js           # Lógica principal del tasador
+        │ └─ css/
+        │   └─ main.css
+        ├─ functions.php         # Integración mínima
+        └─ page-valuation.php
 ```
 
 ## Requisitos / Stack
@@ -51,7 +77,7 @@ Componente independiente que implementa la interfaz y la lógica cliente/servido
 - Bootstrap (estilos usados; se pueden sustituir)
 - Navegadores modernos (IntersectionObserver, Fetch API — Polyfill si es necesario)
 
-## Instalación y puesta en marcha (desarrollador)
+## Instalación y configuración
 
 1. Clona el repo en tu entorno local:
 
@@ -60,6 +86,7 @@ Componente independiente que implementa la interfaz y la lógica cliente/servido
    ```
 
 2. Copia el código de los archivos de la carpeta `theme/` en tu theme de WordPress (en `wp-content/themes/tu-theme/`).
+   > Nota: elige una de las implementaciones (`api-autobiz` o `api-motorflash`) antes de copiar los archivos al theme.
 3. Habilita el theme en WordPress (apariencia → temas).
 4. Importa el formulario de Gravity Forms de ejemplo.
 5. Asegúrate de no dejar claves en `functions.php`. Si el script requiere `ajax_object` o `nonce`, configúralos mediante `wp_localize_script` desde `functions.php`.
@@ -67,8 +94,7 @@ Componente independiente que implementa la interfaz y la lógica cliente/servido
 ## Variables sensibles y buenas prácticas
 
 - Nunca subir:
-
-  - Claves API (Autobiz, reCaptcha, etc.).
+  - Claves API (Autobiz, Motorflash, reCaptcha, etc.).
   - Nonces de producción.
   - Datos reales de usuarios o exóticos (DB dumps con emails, etc.).
 
@@ -91,6 +117,6 @@ Este proyecto está publicado bajo la **MIT License**.
 
 ## Agradecimientos
 
-Este componente se desarrolló dentro del equipo de desarrollo de **MKTmedianet** para un cliente de la agencia. La implementación corresponde a una extracción aislada de la funcionalidad del tasador (interfaz multi-step, integración con API externa de valuación y enlace a Gravity Forms) realizada por el equipo técnico de MKTmedianet para facilitar demostraciones y pruebas.
+Este componente se desarrolló dentro del equipo de desarrollo de **MKTmedianet** para un cliente de la agencia. La implementación publicada corresponde a una extracción aislada de la funcionalidad del tasador (interfaz multi-step, integración con APIs externas de valoración y enlace a Gravity Forms) con fines demostrativos y técnicos.
 
 _Nota: la versión publicada en este repositorio contiene únicamente el código del theme necesario para la demostración; credenciales y datos privados del proyecto original han sido omitidos._
