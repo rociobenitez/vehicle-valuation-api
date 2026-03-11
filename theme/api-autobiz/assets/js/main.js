@@ -39,9 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const NEXT_BY_SELECT = {
     "brand-select": "next-1",
     "model-select": "next-2",
-    "version-select": "next-3",
-    "year-select": "next-4",
-    "doors-select": "next-5",
+    "year-select": "next-3",
+    "doors-select": "next-4",
+    "version-select": "next-5",
   };
 
   // Mensajes
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     blockedBrands.includes(
       String(name || "")
         .trim()
-        .toLowerCase()
+        .toLowerCase(),
     );
 
   /**
@@ -318,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const renderSelectOptions = (
     selectId,
     options = [],
-    { placeholder = "Selecciona una opción", disableBlocked = false } = {}
+    { placeholder = "Selecciona una opción", disableBlocked = false } = {},
   ) => {
     const select = getElement(selectId);
     if (!select) return;
@@ -337,11 +337,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     options.forEach((item) => {
       const opt = document.createElement("option");
-      opt.value = item.id ?? "";
-      opt.textContent = item.name ?? String(item.id ?? "");
-      if (disableBlocked && isBrandBlocked(item.name)) {
+      const optionId = item?.id ?? "";
+      const optionName = String(item?.name ?? optionId);
+      const label =
+        selectId === "brand-select"
+          ? optionName.toLocaleUpperCase("es-ES")
+          : optionName;
+
+      opt.value = optionId;
+      opt.textContent = label;
+
+      if (disableBlocked && isBrandBlocked(optionName)) {
         opt.disabled = true;
-        opt.textContent = `${item.name} (no disponible)`;
+        opt.textContent =
+          selectId === "brand-select"
+            ? `${label} (NO DISPONIBLE)`
+            : `${optionName} (no disponible)`;
       }
 
       select.appendChild(opt);
@@ -413,7 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
     payload,
     selectId,
     placeholder,
-    { disableBlocked = false } = {}
+    { disableBlocked = false } = {},
   ) => {
     const select = getElement(selectId);
     if (!select) return;
@@ -439,7 +450,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       renderSelectOptions(selectId, [], { placeholder: "—" });
       alert("Error al obtener los datos. Inténtalo de nuevo.");
-      console.error("[loadToSelect] Error:", err);
+      console.error("[loadToSelect] Error:", e);
     } finally {
       cleanupLoader(); // quita spinner y restaura estados
     }
@@ -460,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
       {},
       "brand-select",
       "Selecciona una marca",
-      { disableBlocked: true }
+      { disableBlocked: true },
     );
   };
 
@@ -470,38 +481,67 @@ document.addEventListener("DOMContentLoaded", () => {
       "obtener_modelos_por_marca",
       { makeId },
       "model-select",
-      "Selecciona un modelo"
+      "Selecciona un modelo",
     );
   };
 
-  // Paso 3: Versiones
-  const loadVersiones = async (makeId, modelId) => {
-    await loadToSelect(
-      "obtener_versiones_por_modelo",
-      { makeId, modelId },
-      "version-select",
-      "Selecciona una versión"
-    );
-  };
-
-  // Paso 4: Años
+  // Paso 3: Años
   const loadYears = async (makeId, modelId) => {
     await loadToSelect(
       "obtener_datos_por_marca_modelo",
       { makeId, modelId, dataKey: "years" },
       "year-select",
-      "Selecciona el año"
+      "Selecciona el año",
     );
   };
 
-  // Paso 5: Puertas
+  // Paso 4: Puertas
   const loadDoors = async (makeId, modelId) => {
+    const yearSelect = document.getElementById("year-select");
+    const year = yearSelect ? yearSelect.value : "";
+
     await loadToSelect(
       "obtener_datos_por_marca_modelo",
-      { makeId, modelId, dataKey: "doors" },
+      { makeId, modelId, dataKey: "doors", year },
       "doors-select",
-      "Selecciona nº de puertas"
+      "Selecciona nº de puertas",
     );
+
+    const select = getElement("doors-select");
+    const hasRealOptions =
+      select &&
+      Array.from(select.options).some((opt) => opt.value && !opt.disabled);
+
+    return hasRealOptions;
+  };
+
+  // Paso 5: Versiones
+  const loadVersiones = async (makeId, modelId, year, doors) => {
+    const select = getElement("version-select");
+    const msg = getElement("message-no-versions");
+    const btnNext = getElement("next-5");
+
+    await loadToSelect(
+      "obtener_versiones_por_modelo",
+      { makeId, modelId, year, doors },
+      "version-select",
+      "Selecciona una versión",
+    );
+
+    const hasRealOptions =
+      select &&
+      Array.from(select.options).some((opt) => opt.value && !opt.disabled);
+
+    // Si NO hay versiones:
+    // - mostramos mensaje en el paso 5
+    // - deshabilitamos "Siguiente" (next-5) para no pasar a Km sin versión
+    // - el botón "Atrás" (prev-step-5) seguirá funcionando para volver a Puertas
+    if (msg) msg.classList.toggle("d-none", !!hasRealOptions);
+    if (select) select.classList.toggle("d-none", !hasRealOptions);
+    if (btnNext) {
+      btnNext.disabled = !hasRealOptions;
+      btnNext.classList.toggle("d-none", !hasRealOptions);
+    }
   };
 
   /* ==================================================
@@ -602,8 +642,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const result = await fetchData("calcular_tasacion", payload);
         // let base = 0;
         let base = null;
-        if (result?.success === true && result?.data?.quotation != null) {
-          base = Number.parseInt(result.data.quotation, 10) || 0;
+        if (result?.success === true && result?.data?.estimation != null) {
+          base = Number.parseInt(result.data.estimation, 10) || 0;
           if (gfImporteBase) gfImporteBase.value = String(base);
           if (gfImporteFinal) gfImporteFinal.value = ""; // se calcula al "Enviar" GF (Paso 2)
         } else {
@@ -614,7 +654,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           console.warn(
             "[Tasación] API no devolvió cotización. Mensaje:",
-            messageToShow
+            messageToShow,
           );
         }
 
@@ -643,7 +683,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Foco al primer campo visible (no hidden) dentro del formulario de GF
         const first = document.querySelector(
-          "#step-7 input:not([type=hidden]), #step-7 select, #step-7 textarea"
+          "#step-7 input:not([type=hidden]), #step-7 select, #step-7 textarea",
         );
         if (first) first.focus();
 
@@ -735,13 +775,7 @@ document.addEventListener("DOMContentLoaded", () => {
      ============================================ */
   wireSelect("brand-select", "selectedBrand", "selectedBrandName", "next-1");
   wireSelect("model-select", "selectedModel", "selectedModelName", "next-2");
-  wireSelect(
-    "version-select",
-    "selectedVersion",
-    "selectedVersionName",
-    "next-3"
-  );
-  wireSelect("year-select", "selectedYear", "selectedYearName", "next-4");
+  wireSelect("year-select", "selectedYear", "selectedYearName", "next-3");
 
   // Validación extra al cambiar el año (regla de negocio)
   const yearSelect = getElement("year-select");
@@ -749,14 +783,20 @@ document.addEventListener("DOMContentLoaded", () => {
     yearSelect.addEventListener("change", () => {
       const y = parseInt(yearSelect.value, 10);
       const msg = getElement("message-no-version");
-      const nextBtn = getElement("next-4");
+      const nextBtn = getElement("next-3");
       const elegible = Number.isFinite(y) && isYearEligible(y);
       if (msg) msg.style.display = elegible ? "none" : "block";
       if (nextBtn) nextBtn.style.display = elegible ? "block" : "none";
     });
   }
 
-  wireSelect("doors-select", "selectedDoors", "selectedDoorsName", "next-5");
+  wireSelect("doors-select", "selectedDoors", "selectedDoorsName", "next-4");
+  wireSelect(
+    "version-select",
+    "selectedVersion",
+    "selectedVersionName",
+    "next-5",
+  );
 
   /* =====================
      Botones Siguiente
@@ -781,37 +821,21 @@ document.addEventListener("DOMContentLoaded", () => {
   getElement("next-2")?.addEventListener("click", async () => {
     const makeId = getElement("selectedBrand").value;
     const modelId = getElement("selectedModel").value;
-    const makeName = getElement("selectedBrandName").value;
-    const modelName = getElement("selectedModelName").value;
-    if (!modelId) return;
+    // const versionId = getElement("selectedVersion").value;
+    //if (!versionId) return;
 
-    setText("summaryBrand", makeName);
-    setText("summaryModel", modelName);
-
-    resetSelect("version-select", "Selecciona una versión");
     resetSelect("year-select", "Selecciona el año");
     resetSelect("doors-select", "Selecciona nº de puertas");
 
     showStep(3);
-    await loadVersiones(makeId, modelId);
+    await loadYears(makeId, modelId);
   });
 
   getElement("next-3")?.addEventListener("click", async () => {
     const makeId = getElement("selectedBrand").value;
     const modelId = getElement("selectedModel").value;
-    const versionId = getElement("selectedVersion").value;
-    if (!versionId) return;
-
-    resetSelect("year-select", "Selecciona el año");
-    resetSelect("doors-select", "Selecciona nº de puertas");
-
-    showStep(4);
-    await loadYears(makeId, modelId);
-  });
-
-  getElement("next-4")?.addEventListener("click", async () => {
-    const makeId = getElement("selectedBrand").value;
-    const modelId = getElement("selectedModel").value;
+    const makeName = getElement("selectedBrandName")?.value ?? "";
+    const modelName = getElement("selectedModelName")?.value ?? "";
     const year = getElement("selectedYear").value;
     if (!year) return;
 
@@ -823,14 +847,45 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     resetSelect("doors-select", "Selecciona nº de puertas");
+    showStep(4);
+    const hasDoors = await loadDoors(makeId, modelId);
+
+    // Si NO hay puertas, saltar el paso 4 y cargar versiones con puertas=0
+    if (!hasDoors) {
+      if (getElement("selectedDoors")) getElement("selectedDoors").value = "0";
+      if (getElement("selectedDoorsName"))
+        getElement("selectedDoorsName").value = "";
+
+      setText("summaryBrand", makeName);
+      setText("summaryModel", modelName);
+
+      resetSelect("version-select", "Selecciona una versión");
+      showStep(5);
+      await loadVersiones(makeId, modelId, year, 0);
+      return;
+    }
+  });
+
+  getElement("next-4")?.addEventListener("click", async () => {
+    const makeId = getElement("selectedBrand").value;
+    const modelId = getElement("selectedModel").value;
+    const makeName = getElement("selectedBrandName").value;
+    const modelName = getElement("selectedModelName").value;
+    const year = getElement("selectedYear").value;
+    const doors = parseInt(getElement("selectedDoors")?.value || "0", 10) || 0;
+
+    setText("summaryBrand", makeName);
+    setText("summaryModel", modelName);
+
+    resetSelect("version-select", "Selecciona una versión");
     showStep(5);
-    await loadDoors(makeId, modelId);
+    await loadVersiones(makeId, modelId, year, doors);
   });
 
   getElement("next-5")?.addEventListener("click", () => {
-    const doors = getElement("selectedDoors").value;
-    if (!doors) return;
-    showStep(6);
+    const versionId = getElement("selectedVersion").value;
+    if (!versionId) return; // asegura que hay versión
+    showStep(6); // siguiente paso: kilometraje y matrícula
   });
 
   getElement(GF_IDS.gformNextBtn)?.addEventListener("click", () => {
@@ -863,7 +918,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnStarter.addEventListener("click", () => {
       if (
         confirm(
-          "¿Deseas reiniciar el proceso de tasación? Se perderán los datos seleccionados."
+          "¿Deseas reiniciar el proceso de tasación? Se perderán los datos seleccionados.",
         )
       ) {
         window.location.reload();
@@ -924,7 +979,7 @@ Matrícula: ${data.licensePlate || "N/A"}`;
             }
             if (n.querySelector) {
               const conf = n.querySelector(
-                '[id^="gform_confirmation_wrapper_"]'
+                '[id^="gform_confirmation_wrapper_"]',
               );
               if (conf) {
                 activateStep4();
